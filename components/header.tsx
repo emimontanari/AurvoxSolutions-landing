@@ -1,11 +1,51 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Menu, X, ArrowRight } from "lucide-react"
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion"
 import { MagneticHover } from "@/components/motion/scroll-animations"
+
+// Hoist static data outside component (rerender-memo)
+const navItems = [
+  { href: "#servicios", label: "Servicios" },
+  { href: "#proceso", label: "Proceso" },
+  { href: "#beneficios", label: "Beneficios" },
+  { href: "#faq", label: "FAQ" },
+] as const
+
+// Hoist variants outside component (rendering-hoist-jsx)
+const menuVariants = {
+  closed: {
+    opacity: 0,
+    height: 0,
+    transition: {
+      duration: 0.3,
+      ease: [0.25, 0.4, 0.25, 1] as const
+    }
+  },
+  open: {
+    opacity: 1,
+    height: "auto",
+    transition: {
+      duration: 0.4,
+      ease: [0.25, 0.4, 0.25, 1] as const
+    }
+  }
+}
+
+const navItemVariants = {
+  closed: { opacity: 0, x: -20 },
+  open: (i: number) => ({
+    opacity: 1,
+    x: 0,
+    transition: {
+      delay: i * 0.1,
+      duration: 0.3
+    }
+  })
+}
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -13,8 +53,8 @@ export function Header() {
 
   const { scrollY } = useScroll()
   const headerOpacity = useTransform(scrollY, [0, 100], [1, 0.98])
-  const headerBlur = useTransform(scrollY, [0, 100], [0, 20])
 
+  // Use passive event listener for scroll (client-passive-event-listeners)
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20)
@@ -23,55 +63,30 @@ export function Header() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  const navItems = [
-    { href: "#servicios", label: "Servicios" },
-    { href: "#proceso", label: "Proceso" },
-    { href: "#beneficios", label: "Beneficios" },
-    { href: "#faq", label: "FAQ" },
-  ]
+  // Use useCallback for stable function references (rerender-functional-setstate)
+  const toggleMenu = useCallback(() => {
+    setIsMenuOpen(prev => !prev)
+  }, [])
 
-  const menuVariants = {
-    closed: {
-      opacity: 0,
-      height: 0,
-      transition: {
-        duration: 0.3,
-        ease: [0.25, 0.4, 0.25, 1]
-      }
-    },
-    open: {
-      opacity: 1,
-      height: "auto",
-      transition: {
-        duration: 0.4,
-        ease: [0.25, 0.4, 0.25, 1]
-      }
-    }
-  }
+  const closeMenu = useCallback(() => {
+    setIsMenuOpen(false)
+  }, [])
 
-  const navItemVariants = {
-    closed: { opacity: 0, x: -20 },
-    open: (i: number) => ({
-      opacity: 1,
-      x: 0,
-      transition: {
-        delay: i * 0.1,
-        duration: 0.3
-      }
-    })
-  }
+  // Memoize header className to avoid recalculation (rerender-derived-state)
+  const headerClassName = useMemo(() => 
+    `fixed top-0 left-0 right-0 z-50 transition-all duration-700 ${
+      isScrolled ? 'glass-header py-3' : 'bg-transparent py-5'
+    }`,
+    [isScrolled]
+  )
 
   return (
     <motion.header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ${
-        isScrolled
-          ? 'glass-header py-3'
-          : 'bg-transparent py-5'
-      }`}
+      className={headerClassName}
       style={{ opacity: headerOpacity }}
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      transition={{ duration: 0.6, ease: [0.25, 0.4, 0.25, 1] }}
+      transition={{ duration: 0.6, ease: [0.25, 0.4, 0.25, 1] as const }}
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between">
@@ -159,7 +174,7 @@ export function Header() {
           {/* Mobile Menu Button */}
           <motion.button
             className="lg:hidden p-2.5 text-foreground hover:bg-muted/50 rounded-xl transition-colors duration-300"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            onClick={toggleMenu}
             aria-label={isMenuOpen ? "Cerrar menú" : "Abrir menú"}
             aria-expanded={isMenuOpen}
             whileTap={{ scale: 0.95 }}
@@ -213,7 +228,7 @@ export function Header() {
                       <Link
                         href={item.href}
                         className="px-4 py-3.5 text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-all duration-300 text-sm font-medium rounded-xl block"
-                        onClick={() => setIsMenuOpen(false)}
+                        onClick={closeMenu}
                       >
                         {item.label}
                       </Link>
@@ -229,7 +244,7 @@ export function Header() {
                   <Link
                     href="#contacto"
                     className="px-4 py-2.5 text-muted-foreground hover:text-foreground transition-colors duration-300 text-sm font-medium"
-                    onClick={() => setIsMenuOpen(false)}
+                    onClick={closeMenu}
                   >
                     Contacto
                   </Link>
@@ -237,7 +252,7 @@ export function Header() {
                     asChild
                     className="btn-gradient mx-4 h-12 rounded-xl text-sm font-semibold"
                   >
-                    <Link href="#agendar" onClick={() => setIsMenuOpen(false)} className="flex items-center justify-center gap-2">
+                    <Link href="#agendar" onClick={closeMenu} className="flex items-center justify-center gap-2">
                       Agendar Demo
                       <ArrowRight className="w-4 h-4" />
                     </Link>

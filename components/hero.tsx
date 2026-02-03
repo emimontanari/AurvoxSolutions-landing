@@ -4,8 +4,128 @@ import { Button } from "@/components/ui/button"
 import { ArrowRight, Sparkles, MessageSquare, Bot, CheckCircle } from "lucide-react"
 import Link from "next/link"
 import { motion, useScroll, useTransform } from "framer-motion"
-import { useRef } from "react"
+import { useRef, memo } from "react"
 import { FloatingElement, MagneticHover } from "@/components/motion/scroll-animations"
+
+// Hoist animation variants outside component (rendering-hoist-jsx)
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+      delayChildren: 0.2
+    }
+  }
+}
+
+const itemVariants = {
+  hidden: {
+    opacity: 0,
+    y: 40,
+    filter: "blur(10px)"
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: {
+      duration: 0.8,
+      ease: [0.25, 0.4, 0.25, 1] as const
+    }
+  }
+}
+
+const phoneVariants = {
+  hidden: {
+    opacity: 0,
+    scale: 0.9,
+    rotateY: -15,
+    filter: "blur(20px)"
+  },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    rotateY: 0,
+    filter: "blur(0px)",
+    transition: {
+      duration: 1,
+      delay: 0.5,
+      ease: [0.25, 0.4, 0.25, 1] as const
+    }
+  }
+}
+
+// Hoist static data outside component (rerender-memo)
+const trustIndicators = [
+  { value: "+50", label: "Restaurantes", sublabel: "transformados" },
+  { value: "24/7", label: "Atención IA", sublabel: "ininterrumpida" },
+  { value: "+35%", label: "Más reservas", sublabel: "en promedio" }
+] as const
+
+const chatMessages = [
+  { type: "user", text: "Hola, quiero reservar una mesa para 4 personas", delay: 0.8 },
+  { type: "bot", text: "Hola! Claro, estare encantado de ayudarte. Para que dia y hora te gustaria la reserva?", delay: 1.2 },
+  { type: "user", text: "Para este sabado a las 21:00", delay: 1.6 },
+  { type: "bot", text: "Perfecto! Tenemos disponibilidad. A nombre de quien registro la reserva?", delay: 2 },
+] as const
+
+// Memoized chat message component (rerender-memo)
+const ChatMessage = memo(function ChatMessage({ 
+  message, 
+  index 
+}: { 
+  message: typeof chatMessages[number]
+  index: number 
+}) {
+  return (
+    <motion.div
+      className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+      initial={{ opacity: 0, y: 20, scale: 0.9 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ delay: message.delay, duration: 0.5 }}
+    >
+      <div className={`max-w-[85%] px-4 py-3 rounded-2xl ${
+        message.type === 'user'
+          ? 'rounded-br-md bg-primary text-primary-foreground shadow-lg'
+          : 'rounded-bl-md bg-muted/80 text-foreground border border-border/50'
+      } text-sm`}>
+        {message.text}
+      </div>
+    </motion.div>
+  )
+})
+
+// Memoized trust indicator component (rerender-memo)
+const TrustIndicator = memo(function TrustIndicator({
+  stat,
+  index
+}: {
+  stat: typeof trustIndicators[number]
+  index: number
+}) {
+  return (
+    <motion.div
+      className="flex items-center gap-3"
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay: 1 + index * 0.15, duration: 0.5 }}
+    >
+      <div className={`w-12 h-12 rounded-xl ${index === 1 ? 'bg-accent/10 border-accent/20' : 'bg-primary/10 border-primary/20'} flex items-center justify-center border`}>
+        <span className={`font-display text-xl font-bold ${index === 1 ? 'text-accent' : 'text-primary'} tabular-nums`}>
+          {stat.value}
+        </span>
+      </div>
+      <div className="text-left">
+        <div className="text-sm font-medium text-foreground">{stat.label}</div>
+        <div className="text-xs text-muted-foreground">{stat.sublabel}</div>
+      </div>
+      {index < 2 && (
+        <div className="hidden sm:block w-px h-10 bg-border ml-7" />
+      )}
+    </motion.div>
+  )
+})
 
 export function Hero() {
   const sectionRef = useRef(null)
@@ -18,55 +138,6 @@ export function Hero() {
   const backgroundY = useTransform(scrollYProgress, [0, 1], [0, 150])
   const contentOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0])
   const contentY = useTransform(scrollYProgress, [0, 0.5], [0, 100])
-
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15,
-        delayChildren: 0.2
-      }
-    }
-  }
-
-  const itemVariants = {
-    hidden: {
-      opacity: 0,
-      y: 40,
-      filter: "blur(10px)"
-    },
-    visible: {
-      opacity: 1,
-      y: 0,
-      filter: "blur(0px)",
-      transition: {
-        duration: 0.8,
-        ease: [0.25, 0.4, 0.25, 1]
-      }
-    }
-  }
-
-  const phoneVariants = {
-    hidden: {
-      opacity: 0,
-      scale: 0.9,
-      rotateY: -15,
-      filter: "blur(20px)"
-    },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      rotateY: 0,
-      filter: "blur(0px)",
-      transition: {
-        duration: 1,
-        delay: 0.5,
-        ease: [0.25, 0.4, 0.25, 1]
-      }
-    }
-  }
 
   return (
     <section ref={sectionRef} className="relative min-h-screen flex items-center pt-24 pb-16 overflow-hidden">
@@ -172,31 +243,8 @@ export function Hero() {
               className="flex flex-wrap items-center justify-center lg:justify-start gap-x-10 gap-y-4"
               variants={itemVariants}
             >
-              {[
-                { value: "+50", label: "Restaurantes", sublabel: "transformados" },
-                { value: "24/7", label: "Atención IA", sublabel: "ininterrumpida" },
-                { value: "+35%", label: "Más reservas", sublabel: "en promedio" }
-              ].map((stat, index) => (
-                <motion.div
-                  key={index}
-                  className="flex items-center gap-3"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 1 + index * 0.15, duration: 0.5 }}
-                >
-                  <div className={`w-12 h-12 rounded-xl ${index === 1 ? 'bg-accent/10 border-accent/20' : 'bg-primary/10 border-primary/20'} flex items-center justify-center border`}>
-                    <span className={`font-display text-xl font-bold ${index === 1 ? 'text-accent' : 'text-primary'} tabular-nums`}>
-                      {stat.value}
-                    </span>
-                  </div>
-                  <div className="text-left">
-                    <div className="text-sm font-medium text-foreground">{stat.label}</div>
-                    <div className="text-xs text-muted-foreground">{stat.sublabel}</div>
-                  </div>
-                  {index < 2 && (
-                    <div className="hidden sm:block w-px h-10 bg-border ml-7" />
-                  )}
-                </motion.div>
+              {trustIndicators.map((stat, index) => (
+                <TrustIndicator key={index} stat={stat} index={index} />
               ))}
             </motion.div>
           </motion.div>
@@ -260,27 +308,8 @@ export function Hero() {
 
                     {/* Chat messages with staggered animation */}
                     <div className="px-4 py-5 space-y-4 h-[380px] overflow-hidden">
-                      {[
-                        { type: "user", text: "Hola, quiero reservar una mesa para 4 personas", delay: 0.8 },
-                        { type: "bot", text: "Hola! Claro, estare encantado de ayudarte. Para que dia y hora te gustaria la reserva?", delay: 1.2 },
-                        { type: "user", text: "Para este sabado a las 21:00", delay: 1.6 },
-                        { type: "bot", text: "Perfecto! Tenemos disponibilidad. A nombre de quien registro la reserva?", delay: 2 },
-                      ].map((message, index) => (
-                        <motion.div
-                          key={index}
-                          className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
-                          initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          transition={{ delay: message.delay, duration: 0.5 }}
-                        >
-                          <div className={`max-w-[85%] px-4 py-3 rounded-2xl ${
-                            message.type === 'user'
-                              ? 'rounded-br-md bg-primary text-primary-foreground shadow-lg'
-                              : 'rounded-bl-md bg-muted/80 text-foreground border border-border/50'
-                          } text-sm`}>
-                            {message.text}
-                          </div>
-                        </motion.div>
+                      {chatMessages.map((message, index) => (
+                        <ChatMessage key={index} message={message} index={index} />
                       ))}
 
                       {/* Typing indicator */}

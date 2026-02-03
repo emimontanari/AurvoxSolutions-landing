@@ -25,7 +25,7 @@ export const fadeUpVariants = {
     filter: "blur(0px)",
     transition: {
       duration: 0.8,
-      ease: [0.25, 0.4, 0.25, 1]
+      ease: [0.25, 0.4, 0.25, 1] as const
     }
   }
 }
@@ -42,7 +42,7 @@ export const fadeInVariants = {
     filter: "blur(0px)",
     transition: {
       duration: 0.6,
-      ease: [0.25, 0.4, 0.25, 1]
+      ease: [0.25, 0.4, 0.25, 1] as const
     }
   }
 }
@@ -59,7 +59,7 @@ export const slideInLeftVariants = {
     filter: "blur(0px)",
     transition: {
       duration: 0.7,
-      ease: [0.25, 0.4, 0.25, 1]
+      ease: [0.25, 0.4, 0.25, 1] as const
     }
   }
 }
@@ -76,7 +76,7 @@ export const slideInRightVariants = {
     filter: "blur(0px)",
     transition: {
       duration: 0.7,
-      ease: [0.25, 0.4, 0.25, 1]
+      ease: [0.25, 0.4, 0.25, 1] as const
     }
   }
 }
@@ -93,7 +93,7 @@ export const scaleUpVariants = {
     filter: "blur(0px)",
     transition: {
       duration: 0.6,
-      ease: [0.25, 0.4, 0.25, 1]
+      ease: [0.25, 0.4, 0.25, 1] as const
     }
   }
 }
@@ -122,7 +122,7 @@ export const staggerItemVariants = {
     filter: "blur(0px)",
     transition: {
       duration: 0.5,
-      ease: [0.25, 0.4, 0.25, 1]
+      ease: [0.25, 0.4, 0.25, 1] as const
     }
   }
 }
@@ -440,20 +440,20 @@ export function AnimatedCounter({
     count.set(numericValue)
   }
 
+  const displayValue = useTransform(count, (latest: number) => {
+    if (typeof value === 'string' && value.includes('/')) {
+      return value // Return as-is for values like "24/7"
+    }
+    if (typeof value === 'string' && value.includes('.')) {
+      return latest.toFixed(1)
+    }
+    return String(Math.round(latest))
+  })
+
   return (
     <motion.span ref={ref} className={className}>
       {prefix}
-      <motion.span>
-        {useTransform(count, (latest) => {
-          if (typeof value === 'string' && value.includes('/')) {
-            return value // Return as-is for values like "24/7"
-          }
-          if (typeof value === 'string' && value.includes('.')) {
-            return latest.toFixed(1)
-          }
-          return Math.round(latest)
-        })}
-      </motion.span>
+      <motion.span>{displayValue}</motion.span>
       {suffix}
     </motion.span>
   )
