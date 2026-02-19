@@ -211,7 +211,7 @@ export function ChallengesResults() {
               <div className="flex items-center gap-5 mb-10 p-5 rounded-2xl bg-gradient-to-r from-[oklch(0.22_0.04_156_/_0.5)] to-[oklch(0.18_0.02_156_/_0.25)] border border-[oklch(0.45_0.10_156_/_0.25)] backdrop-blur-sm">
                 <AnimatedCheckIcon className="w-14 h-14" />
                 <div>
-                  <span className="font-display font-semibold text-foreground text-xl tracking-tight">Con Aura Solutions</span>
+                  <span className="font-display font-semibold text-foreground text-xl tracking-tight">Con Aurvox Solutions</span>
                   <p className="text-sm text-muted-foreground mt-0.5">La transformación que implementamos</p>
                 </div>
               </div>

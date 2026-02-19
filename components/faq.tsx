@@ -66,14 +66,14 @@ export function FAQ() {
         </ScrollReveal>
 
         {/* FAQ Accordion */}
-        <StaggerContainer staggerDelay={0.08} className="space-y-4">
-          {faqs.map((faq, index) => (
-            <StaggerItem key={index}>
-              <motion.div
-                whileHover={{ scale: 1.01 }}
-                transition={{ duration: 0.2 }}
-              >
-                <Accordion type="single" collapsible>
+        <Accordion type="single" collapsible className="space-y-4">
+          <StaggerContainer staggerDelay={0.08}>
+            {faqs.map((faq, index) => (
+              <StaggerItem key={index}>
+                <motion.div
+                  whileHover={{ scale: 1.01 }}
+                  transition={{ duration: 0.2 }}
+                >
                   <AccordionItem
                     value={`item-${index}`}
                     className="rounded-2xl card-premium px-6 border-border/50 data-[state=open]:border-primary/40 transition-all duration-400"
@@ -100,11 +100,11 @@ export function FAQ() {
                       </motion.div>
                     </AccordionContent>
                   </AccordionItem>
-                </Accordion>
-              </motion.div>
-            </StaggerItem>
-          ))}
-        </StaggerContainer>
+                </motion.div>
+              </StaggerItem>
+            ))}
+          </StaggerContainer>
+        </Accordion>
 
         {/* Help CTA */}
         <ScrollReveal variant="fadeUp" delay={0.3} className="mt-14 text-center">

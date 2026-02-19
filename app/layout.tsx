@@ -33,8 +33,9 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: 'Aura Solutions | Automatización con IA para Restaurantes',
-  description: 'Transformamos restaurantes en negocios eficientes y rentables mediante automatización inteligente con IA que trabaja 24/7. Recupera ingresos perdidos, reduce costos operativos y libera tiempo de tu equipo.',
+  metadataBase: new URL('https://aurvox.ai'),
+  title: 'Aurvox Solutions | Automatización con IA para Restaurantes',
+  description: 'Automatización con IA para restaurantes: WhatsApp inteligente, reservas automáticas y atención 24/7. Recuperá ingresos perdidos y liberá tiempo de tu equipo.',
   generator: 'Next.js',
   keywords: [
     'automatización restaurantes',
@@ -47,9 +48,12 @@ export const metadata: Metadata = {
     'chatbot restaurante',
     'gestión de reservas IA',
   ],
-  authors: [{ name: 'Aura Solutions' }],
-  creator: 'Aura Solutions',
-  publisher: 'Aura Solutions',
+  authors: [{ name: 'Aurvox Solutions' }],
+  creator: 'Aurvox Solutions',
+  publisher: 'Aurvox Solutions',
+  alternates: {
+    canonical: '/',
+  },
   robots: {
     index: true,
     follow: true,
@@ -63,16 +67,25 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: 'website',
-    locale: 'es_ES',
-    url: 'https://aurasolutions.ai',
-    siteName: 'Aura Solutions',
-    title: 'Aura Solutions | Automatización con IA para Restaurantes',
-    description: 'Transformamos restaurantes con automatización inteligente. WhatsApp, llamadas y reservas automatizadas 24/7.',
+    locale: 'es_AR',
+    url: 'https://aurvox.ai',
+    siteName: 'Aurvox Solutions',
+    title: 'Aurvox Solutions | Automatización con IA para Restaurantes',
+    description: 'Automatización con IA para restaurantes: WhatsApp inteligente, reservas automáticas y atención 24/7.',
+    images: [
+      {
+        url: '/LOGO.png',
+        width: 1200,
+        height: 630,
+        alt: 'Aurvox Solutions — Automatización con IA para Restaurantes',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Aura Solutions | IA para Restaurantes',
+    title: 'Aurvox Solutions | IA para Restaurantes',
     description: 'Automatización inteligente que transforma tu restaurante.',
+    images: ['/LOGO.png'],
   },
   icons: {
     icon: [

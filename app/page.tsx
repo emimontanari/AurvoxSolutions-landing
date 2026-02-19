@@ -2,9 +2,9 @@ import dynamic from "next/dynamic"
 import { Header } from "@/components/header"
 import { Hero } from "@/components/hero"
 import { ScrollProgressClient } from "@/components/scroll-progress-client"
+import { WhatsAppFAB } from "@/components/whatsapp-fab"
 
 // Dynamic imports for below-the-fold sections (bundle-dynamic-imports)
-// These components are loaded after the initial page load
 const ChallengesResults = dynamic(
   () => import("@/components/challenges-results").then((mod) => mod.ChallengesResults),
   { ssr: true }
@@ -20,6 +20,11 @@ const Services = dynamic(
   { ssr: true }
 )
 
+const AppetizerPromoSection = dynamic(
+  () => import("@/components/appetizer-promo-section").then((mod) => mod.AppetizerPromoSection),
+  { ssr: true }
+)
+
 const Process = dynamic(
   () => import("@/components/process").then((mod) => mod.Process),
   { ssr: true }
@@ -27,6 +32,26 @@ const Process = dynamic(
 
 const WhyUs = dynamic(
   () => import("@/components/why-us").then((mod) => mod.WhyUs),
+  { ssr: true }
+)
+
+const Testimonials = dynamic(
+  () => import("@/components/testimonials").then((mod) => mod.Testimonials),
+  { ssr: true }
+)
+
+const ROICalculator = dynamic(
+  () => import("@/components/roi-calculator").then((mod) => mod.ROICalculator),
+  { ssr: true }
+)
+
+const Integrations = dynamic(
+  () => import("@/components/integrations").then((mod) => mod.Integrations),
+  { ssr: true }
+)
+
+const ContactForm = dynamic(
+  () => import("@/components/contact-form").then((mod) => mod.ContactForm),
   { ssr: true }
 )
 
@@ -48,7 +73,6 @@ const Footer = dynamic(
 export default function Home() {
   return (
     <>
-      {/* Premium scroll progress indicator - client only */}
       <ScrollProgressClient />
 
       <Header />
@@ -57,12 +81,20 @@ export default function Home() {
         <ChallengesResults />
         <Benefits />
         <Services />
+        <AppetizerPromoSection />
         <Process />
         <WhyUs />
+        <Testimonials />
+        <ROICalculator />
+        <Integrations />
+        <ContactForm />
         <CTASection />
         <FAQ />
       </main>
       <Footer />
+
+      {/* Fixed floating button — renders client-side only */}
+      <WhatsAppFAB />
     </>
   )
 }

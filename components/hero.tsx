@@ -1,397 +1,200 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, Sparkles, MessageSquare, Bot, CheckCircle } from "lucide-react"
+import { ArrowRight, Bot, CheckCircle2, MessageSquare, ShieldCheck } from "lucide-react"
 import Link from "next/link"
-import { motion, useScroll, useTransform } from "framer-motion"
-import { useRef, memo } from "react"
-import { FloatingElement, MagneticHover } from "@/components/motion/scroll-animations"
+import { motion, AnimatePresence } from "framer-motion"
 
-// Hoist animation variants outside component (rendering-hoist-jsx)
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.15,
-      delayChildren: 0.2
-    }
-  }
-}
-
-const itemVariants = {
-  hidden: {
-    opacity: 0,
-    y: 40,
-    filter: "blur(10px)"
-  },
-  visible: {
-    opacity: 1,
-    y: 0,
-    filter: "blur(0px)",
-    transition: {
-      duration: 0.8,
-      ease: [0.25, 0.4, 0.25, 1] as const
-    }
-  }
-}
-
-const phoneVariants = {
-  hidden: {
-    opacity: 0,
-    scale: 0.9,
-    rotateY: -15,
-    filter: "blur(20px)"
-  },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    rotateY: 0,
-    filter: "blur(0px)",
-    transition: {
-      duration: 1,
-      delay: 0.5,
-      ease: [0.25, 0.4, 0.25, 1] as const
-    }
-  }
-}
-
-// Hoist static data outside component (rerender-memo)
 const trustIndicators = [
-  { value: "+50", label: "Restaurantes", sublabel: "transformados" },
-  { value: "24/7", label: "Atención IA", sublabel: "ininterrumpida" },
-  { value: "+35%", label: "Más reservas", sublabel: "en promedio" }
+  { value: "+50", label: "Restaurantes", sublabel: "operando con Aurvox" },
+  { value: "24/7", label: "Atención automatizada", sublabel: "sin interrupciones" },
+  { value: "+35%", label: "Mejora en reservas", sublabel: "promedio mensual" }
 ] as const
 
 const chatMessages = [
-  { type: "user", text: "Hola, quiero reservar una mesa para 4 personas", delay: 0.8 },
-  { type: "bot", text: "Hola! Claro, estare encantado de ayudarte. Para que dia y hora te gustaria la reserva?", delay: 1.2 },
-  { type: "user", text: "Para este sabado a las 21:00", delay: 1.6 },
-  { type: "bot", text: "Perfecto! Tenemos disponibilidad. A nombre de quien registro la reserva?", delay: 2 },
+  { type: "user", text: "Necesito una mesa para 4 personas hoy a las 21:00" },
+  { type: "bot", text: "Listo. Tengo disponibilidad y puedo confirmar en menos de un minuto." },
+  { type: "bot", text: "¿Deseas que envíe la confirmación por WhatsApp?" },
 ] as const
 
-// Memoized chat message component (rerender-memo)
-const ChatMessage = memo(function ChatMessage({ 
-  message, 
-  index 
-}: { 
-  message: typeof chatMessages[number]
-  index: number 
-}) {
+function TypingIndicator() {
   return (
-    <motion.div
-      className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
-      initial={{ opacity: 0, y: 20, scale: 0.9 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ delay: message.delay, duration: 0.5 }}
-    >
-      <div className={`max-w-[85%] px-4 py-3 rounded-2xl ${
-        message.type === 'user'
-          ? 'rounded-br-md bg-primary text-primary-foreground shadow-lg'
-          : 'rounded-bl-md bg-muted/80 text-foreground border border-border/50'
-      } text-sm`}>
-        {message.text}
+    <div className="flex justify-start">
+      <div className="px-4 py-3 rounded-xl bg-muted/80 border border-border/60 flex items-center gap-1.5">
+        <span className="typing-dot" />
+        <span className="typing-dot" />
+        <span className="typing-dot" />
       </div>
-    </motion.div>
+    </div>
   )
-})
-
-// Memoized trust indicator component (rerender-memo)
-const TrustIndicator = memo(function TrustIndicator({
-  stat,
-  index
-}: {
-  stat: typeof trustIndicators[number]
-  index: number
-}) {
-  return (
-    <motion.div
-      className="flex items-center gap-3"
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: 1 + index * 0.15, duration: 0.5 }}
-    >
-      <div className={`w-12 h-12 rounded-xl ${index === 1 ? 'bg-accent/10 border-accent/20' : 'bg-primary/10 border-primary/20'} flex items-center justify-center border`}>
-        <span className={`font-display text-xl font-bold ${index === 1 ? 'text-accent' : 'text-primary'} tabular-nums`}>
-          {stat.value}
-        </span>
-      </div>
-      <div className="text-left">
-        <div className="text-sm font-medium text-foreground">{stat.label}</div>
-        <div className="text-xs text-muted-foreground">{stat.sublabel}</div>
-      </div>
-      {index < 2 && (
-        <div className="hidden sm:block w-px h-10 bg-border ml-7" />
-      )}
-    </motion.div>
-  )
-})
+}
 
 export function Hero() {
-  const sectionRef = useRef(null)
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start start", "end start"]
-  })
+  const [shownMessages, setShownMessages] = useState<number[]>([0])
+  const [showTyping, setShowTyping] = useState(false)
 
-  // Parallax effects for background elements
-  const backgroundY = useTransform(scrollYProgress, [0, 1], [0, 150])
-  const contentOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0])
-  const contentY = useTransform(scrollYProgress, [0, 0.5], [0, 100])
+  useEffect(() => {
+    const t1 = setTimeout(() => setShowTyping(true), 700)
+    const t2 = setTimeout(() => {
+      setShowTyping(false)
+      setShownMessages([0, 1])
+    }, 1900)
+    const t3 = setTimeout(() => setShownMessages([0, 1, 2]), 2600)
+    return () => [t1, t2, t3].forEach(clearTimeout)
+  }, [])
 
   return (
-    <section ref={sectionRef} className="relative min-h-screen flex items-center pt-24 pb-16 overflow-hidden">
-      {/* Animated background layers */}
+    <section className="relative min-h-screen flex items-center pt-24 pb-16 overflow-hidden">
       <div className="absolute inset-0 bg-background" />
+      <div className="absolute inset-0 grid-pattern opacity-15" />
 
-      {/* Parallax mesh gradient */}
-      <motion.div
-        className="absolute inset-0"
-        style={{ y: backgroundY }}
-      >
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_80%_50%_at_20%_40%,oklch(0.78_0.14_75_/_0.08),transparent_50%)]" />
-        <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(ellipse_60%_40%_at_80%_60%,oklch(0.65_0.18_155_/_0.05),transparent_50%)]" />
-      </motion.div>
+      {/* Subtle background orbs */}
+      <div className="absolute top-1/4 -left-32 w-[480px] h-[480px] aurora-orb bg-primary/8 animate-float" style={{ animationDelay: "0s" }} />
+      <div className="absolute bottom-1/4 -right-32 w-[360px] h-[360px] aurora-orb bg-primary/5 animate-float" style={{ animationDelay: "2.5s" }} />
 
-      {/* Refined grid pattern */}
-      <div className="absolute inset-0 grid-pattern opacity-20" />
-      <div className="absolute inset-0 noise-overlay" />
-
-      <motion.div
-        className="relative max-w-7xl mx-auto px-6 lg:px-8 py-12 lg:py-20"
-        style={{ opacity: contentOpacity, y: contentY }}
-      >
-        <div className="grid lg:grid-cols-2 gap-16 lg:gap-20 items-center">
-          {/* Left Column - Content */}
+      <div className="relative max-w-7xl mx-auto px-6 lg:px-8 py-12 lg:py-20">
+        <div className="grid lg:grid-cols-2 gap-14 lg:gap-20 items-center">
           <motion.div
             className="text-center lg:text-left max-w-2xl mx-auto lg:mx-0"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
           >
-            {/* Premium badge */}
-            <motion.div variants={itemVariants}>
-              <div className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full badge-premium mb-10">
-                <motion.div
-                  animate={{ rotate: [0, 15, -15, 0] }}
-                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                >
-                  <Sparkles className="w-4 h-4 text-primary" />
-                </motion.div>
-                <span className="text-sm font-medium text-foreground/90 tracking-wide">
-                  Automatización con IA para Restaurantes
-                </span>
-              </div>
-            </motion.div>
+            <div className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full badge-premium mb-9">
+              <ShieldCheck className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium text-foreground/90 tracking-wide">
+                Automatización confiable para restaurantes
+              </span>
+            </div>
 
-            {/* Powerful headline */}
-            <motion.h1
-              className="font-display text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-[1.05] mb-8"
-              variants={itemVariants}
-            >
-              <span className="gradient-text-white">Transforma tu</span>
+            <h1 className="font-display text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-[1.06] mb-7">
+              <span className="gradient-text-white">Operación más</span>
               <br />
-              <span className="gradient-text">restaurante con IA</span>
-            </motion.h1>
+              <span className="gradient-text">eficiente y rentable</span>
+            </h1>
 
-            {/* Refined subheadline */}
-            <motion.p
-              className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 mb-10 leading-relaxed"
-              variants={itemVariants}
-            >
-              Implementamos soluciones de inteligencia artificial que recuperan
-              ingresos perdidos, automatizan reservas y atienden a tus clientes
-              <span className="text-foreground font-medium"> las 24 horas, los 7 días.</span>
-            </motion.p>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 mb-10 leading-relaxed">
+              Implementamos IA aplicada a reservas, atención y seguimiento comercial.
+              <span className="text-foreground font-medium"> Menos tareas manuales, más control y crecimiento.</span>
+            </p>
 
-            {/* Premium CTAs */}
-            <motion.div
-              className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-14"
-              variants={itemVariants}
-            >
-              <MagneticHover strength={0.15}>
-                <Button
-                  size="lg"
-                  asChild
-                  className="btn-gradient w-full sm:w-auto h-14 px-8 text-base font-semibold rounded-xl"
-                >
-                  <Link href="#agendar" className="flex items-center gap-2">
-                    Agenda tu demo gratis
-                    <motion.span
-                      animate={{ x: [0, 4, 0] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                    >
-                      <ArrowRight className="w-5 h-5" />
-                    </motion.span>
-                  </Link>
-                </Button>
-              </MagneticHover>
-              <MagneticHover strength={0.15}>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  asChild
-                  className="btn-outline-glow w-full sm:w-auto h-14 px-8 text-base font-medium rounded-xl"
-                >
-                  <Link href="#servicios">Ver servicios</Link>
-                </Button>
-              </MagneticHover>
-            </motion.div>
+            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-12">
+              <Button
+                size="lg"
+                asChild
+                className="btn-gradient w-full sm:w-auto h-14 px-8 text-base font-semibold rounded-lg"
+              >
+                <Link href="#agendar" className="flex items-center gap-2">
+                  Solicitar diagnóstico
+                  <ArrowRight className="w-5 h-5" />
+                </Link>
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                asChild
+                className="btn-outline-glow w-full sm:w-auto h-14 px-8 text-base font-medium rounded-lg"
+              >
+                <Link href="#servicios">Ver soluciones</Link>
+              </Button>
+            </div>
 
-            {/* Trust indicators */}
-            <motion.div
-              className="flex flex-wrap items-center justify-center lg:justify-start gap-x-10 gap-y-4"
-              variants={itemVariants}
-            >
+            <div className="grid sm:grid-cols-3 gap-4">
               {trustIndicators.map((stat, index) => (
-                <TrustIndicator key={index} stat={stat} index={index} />
+                <motion.div
+                  key={index}
+                  className="rounded-xl border border-border/60 bg-card/70 px-4 py-4 text-left transition-all duration-300 hover:border-primary/30 hover:bg-card/90"
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.25 + index * 0.08, duration: 0.4 }}
+                >
+                  <div className="text-xl font-bold text-primary tabular-nums">{stat.value}</div>
+                  <div className="text-sm font-medium text-foreground mt-1">{stat.label}</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">{stat.sublabel}</div>
+                </motion.div>
               ))}
-            </motion.div>
+            </div>
           </motion.div>
 
-          {/* Right Column - Premium Phone Mockup */}
           <motion.div
             className="relative hidden lg:block"
-            variants={phoneVariants}
-            initial="hidden"
-            animate="visible"
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7, delay: 0.15 }}
           >
-            {/* Ambient glow */}
-            <motion.div
-              className="absolute inset-0 glow-bg-primary scale-125 opacity-40"
-              animate={{
-                opacity: [0.3, 0.5, 0.3],
-                scale: [1.2, 1.3, 1.2]
-              }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-            />
+            {/* Glow behind card */}
+            <div className="absolute inset-0 -z-10 blur-3xl opacity-30 bg-primary/20 rounded-3xl scale-95" />
 
-            {/* Premium phone device */}
-            <div className="relative mx-auto">
-              <FloatingElement duration={5} distance={12}>
-                <div className="relative mx-auto w-[320px] h-[640px] rounded-[48px] bg-gradient-to-b from-[oklch(0.25_0.01_60)] to-[oklch(0.15_0.008_60)] p-3 shadow-[0_50px_100px_-20px_oklch(0_0_0_/_0.5),0_30px_60px_-30px_oklch(0_0_0_/_0.3)]">
-                  {/* Inner bezel */}
-                  <div className="absolute inset-3 rounded-[40px] bg-gradient-to-b from-[oklch(0.20_0.008_60)] to-[oklch(0.12_0.006_60)]" />
-
-                  {/* Screen */}
-                  <div className="relative w-full h-full rounded-[40px] bg-background overflow-hidden border border-border/30">
-                    {/* Dynamic Island */}
-                    <div className="absolute top-3 left-1/2 -translate-x-1/2 w-28 h-7 rounded-full bg-black z-10" />
-
-                    {/* Chat header */}
-                    <div className="relative pt-12 px-5 pb-4 border-b border-border/50 bg-background/80 backdrop-blur-xl">
-                      <div className="flex items-center gap-3">
-                        <motion.div
-                          className="w-11 h-11 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg"
-                          animate={{ scale: [1, 1.05, 1] }}
-                          transition={{ duration: 2, repeat: Infinity }}
-                        >
-                          <Bot className="w-6 h-6 text-primary-foreground" />
-                        </motion.div>
-                        <div className="flex-1">
-                          <div className="text-sm font-semibold text-foreground">Aura AI</div>
-                          <div className="flex items-center gap-1.5 text-xs text-accent">
-                            <motion.span
-                              className="w-2 h-2 rounded-full bg-accent"
-                              animate={{ opacity: [1, 0.5, 1] }}
-                              transition={{ duration: 1.5, repeat: Infinity }}
-                            />
-                            En línea
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Chat messages with staggered animation */}
-                    <div className="px-4 py-5 space-y-4 h-[380px] overflow-hidden">
-                      {chatMessages.map((message, index) => (
-                        <ChatMessage key={index} message={message} index={index} />
-                      ))}
-
-                      {/* Typing indicator */}
-                      <motion.div
-                        className="flex justify-start"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 2.4, duration: 0.3 }}
-                      >
-                        <div className="px-4 py-3 rounded-2xl bg-muted/50 border border-border/30 flex items-center gap-1.5">
-                          {[0, 1, 2].map((i) => (
-                            <motion.div
-                              key={i}
-                              className="w-2 h-2 rounded-full bg-primary/60"
-                              animate={{ y: [0, -5, 0] }}
-                              transition={{
-                                duration: 0.6,
-                                repeat: Infinity,
-                                delay: i * 0.15
-                              }}
-                            />
-                          ))}
-                        </div>
-                      </motion.div>
-                    </div>
-
-                    {/* Input area */}
-                    <div className="absolute bottom-4 left-4 right-4">
-                      <div className="flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-muted/60 border border-border/50">
-                        <MessageSquare className="w-5 h-5 text-muted-foreground" />
-                        <span className="text-muted-foreground text-sm">Escribe un mensaje...</span>
-                      </div>
+            <div className="relative mx-auto w-[360px] rounded-3xl border border-border/60 bg-card/85 backdrop-blur-md shadow-[0_24px_60px_oklch(0_0_0_/_0.32)] overflow-hidden">
+              <div className="px-6 py-5 border-b border-border/60 bg-background/60">
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center">
+                    <Bot className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-semibold text-foreground">Asistente Aurvox</div>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                      <span className="text-xs text-primary">Operativo y disponible</span>
                     </div>
                   </div>
                 </div>
-              </FloatingElement>
+              </div>
 
-              {/* Floating badges */}
-              <FloatingElement delay={0.5} duration={4} distance={10}>
-                <motion.div
-                  className="absolute -left-8 top-24 px-4 py-3 rounded-2xl card-premium shadow-2xl"
-                  initial={{ opacity: 0, x: -50 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 1.5, duration: 0.6 }}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-accent/15 flex items-center justify-center border border-accent/25">
-                      <CheckCircle className="w-5 h-5 text-accent" />
-                    </div>
-                    <div>
-                      <div className="text-[11px] text-muted-foreground uppercase tracking-wider">Confirmada</div>
-                      <div className="text-sm font-semibold text-foreground">Mesa #5 - 4 personas</div>
-                    </div>
-                  </div>
-                </motion.div>
-              </FloatingElement>
+              <div className="px-5 py-5 space-y-3 min-h-[168px]">
+                <AnimatePresence mode="sync">
+                  {chatMessages.map((message, index) =>
+                    shownMessages.includes(index) ? (
+                      <motion.div
+                        key={`msg-${index}`}
+                        className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <div
+                          className={`max-w-[86%] px-4 py-3 rounded-xl text-sm leading-relaxed ${
+                            message.type === 'user'
+                              ? 'bg-primary text-primary-foreground'
+                              : 'bg-muted/80 text-foreground border border-border/60'
+                          }`}
+                        >
+                          {message.text}
+                        </div>
+                      </motion.div>
+                    ) : null
+                  )}
 
-              <FloatingElement delay={1} duration={4.5} distance={10}>
-                <motion.div
-                  className="absolute -right-6 bottom-36 px-4 py-3 rounded-2xl card-premium shadow-2xl"
-                  initial={{ opacity: 0, x: 50 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 1.8, duration: 0.6 }}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center border border-primary/25">
-                      <Sparkles className="w-5 h-5 text-primary" />
-                    </div>
-                    <div>
-                      <div className="text-[11px] text-muted-foreground uppercase tracking-wider">Respuesta</div>
-                      <div className="text-sm font-semibold text-foreground">&lt; 3 segundos</div>
-                    </div>
+                  {showTyping && (
+                    <motion.div
+                      key="typing"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -4, transition: { duration: 0.15 } }}
+                      transition={{ duration: 0.25 }}
+                    >
+                      <TypingIndicator />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              <div className="px-5 pb-5">
+                <div className="flex items-center justify-between rounded-xl border border-border/60 bg-background/70 px-4 py-3">
+                  <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                    <MessageSquare className="w-4 h-4" />
+                    Confirmación enviada al cliente
                   </div>
-                </motion.div>
-              </FloatingElement>
+                  <CheckCircle2 className="w-4 h-4 text-primary" />
+                </div>
+              </div>
             </div>
           </motion.div>
         </div>
-      </motion.div>
+      </div>
 
-      {/* Elegant bottom fade */}
-      <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-background via-background/80 to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-36 bg-gradient-to-t from-background via-background/85 to-transparent" />
     </section>
   )
 }
