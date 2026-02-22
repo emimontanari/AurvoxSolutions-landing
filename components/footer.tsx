@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Linkedin, Twitter, Instagram, Mail, MapPin, Building2 } from "lucide-react"
+import { Linkedin, Twitter, Instagram, Mail, MapPin } from "lucide-react"
 import { motion } from "framer-motion"
 import { ScrollReveal, StaggerContainer, staggerItemVariants } from "@/components/motion/scroll-animations"
 
@@ -32,22 +32,44 @@ const socialLinks = [
   { icon: Instagram, href: "https://www.instagram.com", label: "Instagram" },
 ]
 
+function AurvoxMark({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 100 100"
+      className={className}
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path d="M50 10 L90 90 L75 90 L65 70 L35 70 L25 90 L10 90 Z M42 55 L58 55 L50 38 Z" />
+    </svg>
+  )
+}
+
 export function Footer() {
   return (
     <footer id="contacto" className="relative overflow-hidden">
       <div className="section-divider" />
       <div className="absolute inset-0 bg-background" />
 
+      {/* Ambient glow */}
+      <div className="absolute -top-28 left-1/2 -translate-x-1/2 w-[480px] h-[180px] rounded-full bg-primary/6 blur-3xl pointer-events-none" />
+
       <div className="relative max-w-7xl mx-auto px-6 lg:px-8 py-20 lg:py-24">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-10 lg:gap-14">
+
+          {/* Brand column */}
           <ScrollReveal variant="fadeUp" className="col-span-2">
-            <Link href="/" className="flex items-center gap-3 mb-8 group">
-              <div className="w-12 h-12 rounded-lg bg-primary/12 border border-primary/30 flex items-center justify-center transition-colors group-hover:bg-primary/16">
-                <Building2 className="w-6 h-6 text-primary" />
+            <Link href="/" className="flex items-center gap-3 mb-8 group w-fit">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/25 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/16 group-hover:border-primary/40 shrink-0">
+                <AurvoxMark className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <span className="font-display font-semibold text-xl text-foreground block leading-none">Aurvox</span>
-                <span className="text-[10px] text-muted-foreground uppercase tracking-[0.25em] mt-0.5 block">Solutions</span>
+                <span className="font-display font-semibold text-xl text-foreground block leading-none">
+                  Aurvox
+                </span>
+                <span className="text-[10px] text-muted-foreground uppercase tracking-[0.25em] mt-0.5 block">
+                  Solutions
+                </span>
               </div>
             </Link>
 
@@ -94,13 +116,19 @@ export function Footer() {
             </div>
           </ScrollReveal>
 
+          {/* Link columns */}
           <ScrollReveal variant="fadeUp" delay={0.1}>
-            <h4 className="font-display font-semibold mb-5 text-xs uppercase tracking-[0.2em] text-muted-foreground">Soluciones</h4>
+            <h4 className="font-display font-semibold mb-5 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              Soluciones
+            </h4>
             <StaggerContainer staggerDelay={0.04}>
               <ul className="space-y-3.5">
                 {footerLinks.soluciones.map((link) => (
                   <motion.li key={link.label} variants={staggerItemVariants}>
-                    <Link href={link.href} className="inline-flex min-h-11 items-center text-muted-foreground hover:text-foreground text-sm transition-colors duration-200">
+                    <Link
+                      href={link.href}
+                      className="inline-flex min-h-11 items-center text-muted-foreground hover:text-foreground text-sm transition-colors duration-200"
+                    >
                       {link.label}
                     </Link>
                   </motion.li>
@@ -110,12 +138,17 @@ export function Footer() {
           </ScrollReveal>
 
           <ScrollReveal variant="fadeUp" delay={0.2}>
-            <h4 className="font-display font-semibold mb-5 text-xs uppercase tracking-[0.2em] text-muted-foreground">Empresa</h4>
+            <h4 className="font-display font-semibold mb-5 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              Empresa
+            </h4>
             <StaggerContainer staggerDelay={0.04}>
               <ul className="space-y-3.5">
                 {footerLinks.empresa.map((link) => (
                   <motion.li key={link.label} variants={staggerItemVariants}>
-                    <Link href={link.href} className="inline-flex min-h-11 items-center text-muted-foreground hover:text-foreground text-sm transition-colors duration-200">
+                    <Link
+                      href={link.href}
+                      className="inline-flex min-h-11 items-center text-muted-foreground hover:text-foreground text-sm transition-colors duration-200"
+                    >
                       {link.label}
                     </Link>
                   </motion.li>
@@ -125,12 +158,17 @@ export function Footer() {
           </ScrollReveal>
 
           <ScrollReveal variant="fadeUp" delay={0.3}>
-            <h4 className="font-display font-semibold mb-5 text-xs uppercase tracking-[0.2em] text-muted-foreground">Soporte</h4>
+            <h4 className="font-display font-semibold mb-5 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              Soporte
+            </h4>
             <StaggerContainer staggerDelay={0.04}>
               <ul className="space-y-3.5">
                 {footerLinks.soporte.map((link) => (
                   <motion.li key={link.label} variants={staggerItemVariants}>
-                    <Link href={link.href} className="inline-flex min-h-11 items-center text-muted-foreground hover:text-foreground text-sm transition-colors duration-200">
+                    <Link
+                      href={link.href}
+                      className="inline-flex min-h-11 items-center text-muted-foreground hover:text-foreground text-sm transition-colors duration-200"
+                    >
                       {link.label}
                     </Link>
                   </motion.li>
@@ -140,6 +178,7 @@ export function Footer() {
           </ScrollReveal>
         </div>
 
+        {/* Bottom bar */}
         <motion.div
           className="border-t border-border/50 mt-16 pt-10"
           initial={{ opacity: 0 }}
@@ -148,14 +187,23 @@ export function Footer() {
           transition={{ delay: 0.35, duration: 0.45 }}
         >
           <div className="flex flex-col md:flex-row justify-between items-center gap-5">
-            <p className="text-muted-foreground/70 text-sm">
-              © {new Date().getFullYear()} Aurvox Solutions. Todos los derechos reservados.
-            </p>
+            <div className="flex items-center gap-2.5">
+              <AurvoxMark className="w-3.5 h-3.5 text-primary/50" />
+              <p className="text-muted-foreground/70 text-sm">
+                © {new Date().getFullYear()} Aurvox Solutions. Todos los derechos reservados.
+              </p>
+            </div>
             <div className="flex items-center gap-8">
-              <Link href="/privacidad" className="text-muted-foreground/70 hover:text-foreground text-sm transition-colors duration-200">
+              <Link
+                href="/privacidad"
+                className="text-muted-foreground/70 hover:text-foreground text-sm transition-colors duration-200"
+              >
                 Política de Privacidad
               </Link>
-              <Link href="#faq" className="text-muted-foreground/70 hover:text-foreground text-sm transition-colors duration-200">
+              <Link
+                href="#faq"
+                className="text-muted-foreground/70 hover:text-foreground text-sm transition-colors duration-200"
+              >
                 Términos de Servicio
               </Link>
             </div>
