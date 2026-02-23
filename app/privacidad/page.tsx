@@ -359,8 +359,8 @@ export default function PrivacidadPage() {
               {[
                 { label: "Responsable", value: "Aurvox Solutions" },
                 { label: "Correo", value: "Aurvox.us@gmail.com" },
-                { label: "Dirección", value: "Buenos Aires, Argentina" },
-                { label: "URL", value: "https://aurvox.ai/privacidad" },
+                { label: "Dirección", value: "Miami, FL, United States" },
+                { label: "URL", value: "https://aurvox.dev/privacidad" },
               ].map(({ label, value }) => (
                 <div key={label} className="flex items-start gap-3 text-sm">
                   <span className="text-muted-foreground w-24 shrink-0">{label}</span>
