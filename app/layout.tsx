@@ -33,7 +33,7 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://aurvox.ai'),
+  metadataBase: new URL('https://aurvox.dev'),
   title: 'Aurvox Solutions | Automatización con IA para Restaurantes',
   description: 'Automatización con IA para restaurantes: WhatsApp inteligente, reservas automáticas y atención 24/7. Recuperá ingresos perdidos y liberá tiempo de tu equipo.',
   generator: 'Next.js',
@@ -68,7 +68,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'es_AR',
-    url: 'https://aurvox.ai',
+    url: 'https://aurvox.dev',
     siteName: 'Aurvox Solutions',
     title: 'Aurvox Solutions | Automatización con IA para Restaurantes',
     description: 'Automatización con IA para restaurantes: WhatsApp inteligente, reservas automáticas y atención 24/7.',

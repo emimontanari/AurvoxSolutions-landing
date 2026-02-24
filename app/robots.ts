@@ -6,6 +6,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: '*',
       allow: '/',
     },
-    sitemap: 'https://aurvox.ai/sitemap.xml',
+    sitemap: 'https://aurvox.dev/sitemap.xml',
   }
 }
